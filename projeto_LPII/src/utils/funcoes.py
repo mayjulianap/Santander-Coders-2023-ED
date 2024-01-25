@@ -144,33 +144,62 @@ def criar_registro_movimentacao(tipo: str, valor: float,
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
-    #     return
-
-    # return
-
-def deletar_registro(indice, movimentacoes):
-    for i, movimentacao in enumerate(movimentacoes):
-        if movimentacao['ID'] == indice:
-            del movimentacoes[i]
-            break
-
-    return movimentacoes
 
 
 def calcular_rendimento(taxa: float=0.003, 
                         valor: float=0, 
                         data_anterior=None, 
                         data_atual=None):
-    # Cálculo do rendimento de investimento
-    # M = C * (1 + i)^t
-    # t = contar_dias_entre_datas(data_anterior,data_atual)
+    """
+    Cálculo do rendimento de investimento
+    M = C * (1 + i)^t
+    t = contar_dias_entre_datas(data_anterior,data_atual)
+
+    Parameters:
+        taxa (float): taxa de rendimento
+        valor (float): valor investido
+        data_anterior (datetime): data do investimento anterior
+        data_atual (datetime): data atual
+
+    Returns:
+        rendimento (float): rendimento do investimento
+    """
+    
     t = (data_atual - data_anterior).days
     montante_final = valor * (1 + taxa)**t
     rendimento = montante_final- valor
     return round(rendimento, 3)
 
+def deletar_registro(indice: int, tipo: str,
+                     database_path: str):
 
+    """
+    Determina o tipo de movimentação e deleta o registro correspondente ao indice
+
+    Parameters:
+        indice (int): indice do registro a ser deletado
+        tipo (str): tipo de movimentação
+        database_path (str): caminho do banco de dados
+    """
+    tipo = tipo.lower()
+    if tipo in ['receita', 'despesa']:
+        movimentacoes = read_csv(f"{database_path}/movimentacoes.csv")
+        movimentacoes.pop(indice)
+        with open(f"{database_path}/movimentacoes.csv", 'w') as file:
+            writer = csv.writer(file, delimiter=',', lineterminator='\n')
+            writer.writerows(movimentacoes)
+    elif tipo == 'investimento':
+        movimentacoes = read_csv(f"{database_path}/investimentos.csv")
+        movimentacoes.pop(indice)
+        with open(f"{database_path}/investimentos.csv", 'w') as file:
+            writer = csv.writer(file, delimiter=',', lineterminator='\n')
+            writer.writerows(movimentacoes)
+    else:
+        print('Tipo de movimentação inválida.',
+              'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
+        
 def atualizar_registro(movimentacoes, indice, valor=None, tipo=None):
+
     for movimentacao in movimentacoes:
         if movimentacao['ID'] == indice:
             movimentacao.update({"valor": valor, "tipo": tipo})
