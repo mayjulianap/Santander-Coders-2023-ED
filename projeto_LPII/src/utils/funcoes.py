@@ -33,7 +33,7 @@ def retornar_ultimo_id(tipo: str, path: str):
                     ultimo_id (str): Ultimo id registrado no banco de dados escolhido.
             """
     try:
-        if tipo.lower() not in ['receita', 'investimento']:
+        if tipo.lower() not in ['receita', 'despesa', 'investimento']:
             raise ValueError("Tipo de movimentação inválido.") # criar classe de erro
     except (ValueError, AttributeError) as e:
         return tipo, e
@@ -101,7 +101,6 @@ def criar_registro_movimentacao(tipo: str, valor: float,
         with open(f"{database_path}/movimentacoes.csv", 'a+') as file:
             identificador = int(retornar_ultimo_id(tipo=tipo, path=database_path)) + 1
             conteudo = [[f'{identificador:07d}', tipo, valor, ano, mes, dia]]
-            print(conteudo)
             writer = csv.writer(file, delimiter=',', lineterminator='\n')
             writer.writerows(conteudo)
 
@@ -133,7 +132,7 @@ def criar_registro_movimentacao(tipo: str, valor: float,
             capital = valor
             montante = float(ultimo_investimento["montante"]) + capital + rendimento
 
-            conteudo = [[f'{identificador:07d}', tipo,capital,taxa,ano,mes,dia,montante,rendimento]]
+            conteudo = [[f'{identificador:07d}', tipo,capital,taxa,ano,mes,dia,round(montante, 2),rendimento]]
             
 
         with open(f"{database_path}/investimentos.csv", 'a+') as file:
@@ -185,33 +184,52 @@ def deletar_registro(indice: int, tipo: str,
     if tipo in ['receita', 'despesa']:
         movimentacoes = read_csv(f"{database_path}/movimentacoes.csv")
         movimentacoes.pop(indice)
+        keys = movimentacoes[0].keys()
         with open(f"{database_path}/movimentacoes.csv", 'w') as file:
-            writer = csv.writer(file, delimiter=',', lineterminator='\n')
-            writer.writerows(movimentacoes)
+            dict_writer = csv.DictWriter(file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(movimentacoes)
     elif tipo == 'investimento':
         movimentacoes = read_csv(f"{database_path}/investimentos.csv")
         movimentacoes.pop(indice)
+        keys = movimentacoes[0].keys()
         with open(f"{database_path}/investimentos.csv", 'w') as file:
-            writer = csv.writer(file, delimiter=',', lineterminator='\n')
-            writer.writerows(movimentacoes)
+            dict_writer = csv.DictWriter(file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(movimentacoes)
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
         
 def atualizar_registro(movimentacoes, indice, valor=None, tipo=None):
+    """
+    atualiza o valor ou o tipo de uma movimentação
+    """
+    pass
 
-    for movimentacao in movimentacoes:
-        if movimentacao['ID'] == indice:
-            movimentacao.update({"valor": valor, "tipo": tipo})
-            break
+
+
+def agrupar_movimentacoes(movimentacoes, agrupar_por):
+    totais = {}
     
-    # if indice < len(movimentacoes):
+    for mov in movimentacoes:
+        kss = list(mov.keys())
+        chave = None
+        data = datetime.datetime(int(mov['ano']), int(mov['mes']), int(mov['dia']))
+        if agrupar_por == 'mes':
+            chave = f"valor_mes_{data.month}"  # Agrupar pelo mês
+        elif agrupar_por == 'tipo':
+            chave = mov['tipo']  # Agrupar pelo tipo de movimentação
 
-    #     if valor is not None:
-    #         movimentacoes[indice]['valor'] = valor
-    #     if tipo is not None:
-    #         movimentacoes[indice]['tipo'] = tipo
-    return movimentacoes
+        if chave not in totais:
+            totais[chave] = 0
+        if "valor" in kss:
+            totais[chave] += float(mov['valor'])
+        else:
+            totais[chave] += float(mov['montante'])
+
+    return totais
+
 
 def exportar_relatorio(movimentacoes, formato='json'):
     if formato == 'json':
@@ -225,20 +243,4 @@ def exportar_relatorio(movimentacoes, formato='json'):
         for mov in movimentacoes[1:]:
             relatorio_csv += f"{mov['ID']},{mov['data']},{mov['tipo']},{mov['valor']},{mov.get('montante_investimento', '')}\n"
         return relatorio_csv
-
-def agrupar_movimentacoes(movimentacoes, agrupar_por):
-    totais = {}
-
-    for mov in movimentacoes:
-        chave = None
-
-        if agrupar_por == 'mes':
-            chave = f"valor_mes_{mov['data'].month}"  # Agrupar pelo mês
-        elif agrupar_por == 'tipo':
-            chave = mov['tipo']  # Agrupar pelo tipo de movimentação
-
-        if chave not in totais:
-            totais[chave] = 0
-        totais[chave] += mov['valor']
-
-    return totais
+    
