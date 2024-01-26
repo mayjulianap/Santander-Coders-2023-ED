@@ -302,13 +302,13 @@ def deletar_registro(indice: int, tipo: str,
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
     return print(f"Registro {registro_retirado} deletado com sucesso!")
 
-def atualizar_registro(dia: int, 
-                       mes: int, 
-                       ano: int, 
-                       valor: str, 
-                       tipo: str, 
+
+
+def atualizar_registro(indice: int,
+                       tipo: str,
                        database_path: str,
-                       **parametros_investimento):
+                       data=datetime.datetime.today(),
+                       **parametros):
     """
     atualiza o valor ou o tipo de uma movimentação com base na data de registro
 
@@ -319,20 +319,16 @@ def atualizar_registro(dia: int,
         valor (float): valor da movimentação
         tipo (str): tipo da movimentação
     Returns:
-
     """
-    data = datetime.datetime(ano, mes, dia)
-    tipo = tipo.lower()
     if tipo in ['receita', 'despesa']:
         movimentacoes = read_csv(f"{database_path}/movimentacoes.csv")
-        indice = None
         for nn, mov in enumerate(movimentacoes):
-            temp_data = datetime.datetime(int(mov['ano']), int(mov['mes']), int(mov['dia']))
-            if temp_data == data:
-                indice = nn
-                break
-        movimentacoes[indice]["valor"] = valor
-        movimentacoes[indice]["tipo"] = tipo
+            temp_id = int(mov["id"])
+            if temp_id == indice:
+                if "valor" in parametros:
+                    movimentacoes[temp_id-1]["valor"] = parametros["valor"]
+                if "tipo" in parametros:
+                    movimentacoes[temp_id-1]["tipo"] = tipo
 
         keys = movimentacoes[0].keys()
         with open(f"{database_path}/movimentacoes.csv", 'w') as file:
@@ -340,58 +336,60 @@ def atualizar_registro(dia: int,
             dict_writer.writeheader()
             dict_writer.writerows(movimentacoes)
     elif tipo == 'investimento':
-        if "taxa" not in parametros_investimento:
+        if "taxa" not in parametros:
             raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
         else:
-            taxa = parametros_investimento["taxa"]
+            taxa = parametros["taxa"]
         investimentos = read_csv(f"{database_path}/investimentos.csv")
-        indice = None
         for nn, mov in enumerate(investimentos):
-            temp_data = datetime.datetime(int(mov['ano']), int(mov['mes']), int(mov['dia']))
-            if temp_data == data:
-                indice = nn
+            temp_id = int(mov["id"])
+            if temp_id == indice:
+                if "valor" in parametros:
+                    investimentos[temp_id-1]["capital"] = parametros["valor"]
+                if "tipo" in parametros:
+                    investimentos[temp_id-1]["tipo"] = tipo
+                if "taxa" in parametros:
+                    investimentos[temp_id-1]["taxa"] = taxa
+                if "capital" in parametros:
+                    investimentos[temp_id-1]["capital"] = parametros["capital"]
                 break
-        investimentos[indice]["capital"] = valor
-        investimentos[indice]["tipo"] = tipo
         
         investimentos_atualizados = []
         for nn, mov in enumerate(investimentos):
             if nn == 0:
-                identificador = nn + 1
-                rendimento = 0
                 investimentos_atualizados.append({
-                    "id": f'{identificador:07d}',
-                    "tipo": tipo,
-                    "capital": valor,
-                    "taxa": taxa,
-                    "ano": ano,
-                    "mes": mes,
-                    "dia": dia,
-                    "montante": valor,
-                    "rendimento": rendimento
+                    "id": mov["id"],
+                    "tipo": mov["tipo"],
+                    "capital": mov["capital"],
+                    "taxa": mov["taxa"],
+                    "ano": mov["ano"],
+                    "mes": mov["mes"],
+                    "dia": mov["dia"],
+                    "montante": mov["montante"],
+                    "rendimento": mov["rendimento"]
                 })
             else:
                 ultimo_investimento = investimentos[nn-1]
                 dia_anterior =datetime.datetime(int(ultimo_investimento["ano"]), 
                                                 int(ultimo_investimento["mes"]), 
                                                 int(ultimo_investimento["dia"]))
-                dia_atual = datetime.datetime(ano, mes, dia)
+                dia_atual = datetime.datetime(int(mov["ano"]), int(mov["mes"]), int(mov["dia"]))
 
                 rendimento = calcular_rendimento(taxa=taxa, 
                                                 valor=float(ultimo_investimento["montante"]), 
                                                     data_anterior=dia_anterior, 
                                                     data_atual=dia_atual)
                 identificador = nn + 1
-                montante = float(ultimo_investimento["montante"]) + valor + float(ultimo_investimento["rendimento"])
+                montante = float(ultimo_investimento["montante"]) + float(mov["capital"]) + float(ultimo_investimento["rendimento"])
 
                 investimentos_atualizados.append({
-                    "id": f'{identificador:07d}',
-                    "tipo": tipo,
-                    "capital": valor,
-                    "taxa": taxa,
-                    "ano": ano,
-                    "mes": mes,
-                    "dia": dia,
+                    "id": mov["id"],
+                    "tipo": mov["tipo"],
+                    "capital": mov["capital"],
+                    "taxa": mov["taxa"],
+                    "ano": mov["ano"],
+                    "mes": mov["mes"],
+                    "dia": mov["dia"],
                     "montante": montante,
                     "rendimento": rendimento
                 })
@@ -404,7 +402,6 @@ def atualizar_registro(dia: int,
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
-    pass
 
 def agrupar_movimentacoes(movimentacoes, agrupar_por):
     totais = {}
