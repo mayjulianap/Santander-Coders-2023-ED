@@ -14,15 +14,15 @@
         "dia": "28"
     },
     "0000004": {
-        "tipo": "despesa",
-        "valor": "22",
+        "tipo": "receita",
+        "valor": "13",
         "ano": "2023",
         "mes": "4",
         "dia": "9"
     },
     "0000005": {
         "tipo": "receita",
-        "valor": "22",
+        "valor": "5423.0",
         "ano": "2023",
         "mes": "6",
         "dia": "14"

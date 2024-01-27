@@ -21,6 +21,19 @@ def read_csv(path):
             lista_de_dicionarios.append(linha)
     return lista_de_dicionarios
 
+def exportar_csv(lista_dicts, path, tipo):
+    keys = lista_dicts[0].keys()
+    if tipo in ['receita', 'despesa']:
+        filename = "movimentacoes.csv"
+    elif tipo == 'investimento':
+        filename = "investimentos.csv"
+    else:
+        raise ValueError("Tipo de movimentacao invalida.")
+    with open(f"{path}/{filename}", 'w') as file:
+        dict_writer = csv.DictWriter(file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(lista_dicts)
+
 def read_base_financas(path):
     """
     retorna uma lista de dicionarios, correspondente aos valores de cada linha do arquivo.
@@ -93,11 +106,12 @@ def incluir_registros_base_dados(**parametros):
                 criar_registro_movimentacao(tipo=tipo, valor=valor,
                                         ano=ano, mes=mes, dia=dia)
         elif opt == 2:
-            if "taxa" not in parametros:
-                raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
+            if "path" not in parametros:
+                raise ValueError("Ler registros de um CSV requer o diretorio do arquivo.")
             else:
                 path = parametros["path"]
             financas = incluir_de_csv(path)
+            # inclui os dados nos bancos de dados
             for financa in financas:
                 tipo = financa["tipo"]
                 valor = float(financa["valor"])
@@ -116,6 +130,8 @@ def incluir_registros_base_dados(**parametros):
                 else:
                     criar_registro_movimentacao(tipo=tipo, valor=valor,
                                             ano=ano, mes=mes, dia=dia)
+            
+            incluir_rendimento_investimento(database_path=path)
         else:
             print("Opção inválida!")
 
@@ -201,6 +217,7 @@ def criar_registro_movimentacao(tipo: str, valor: float,
             conteudo = [[f'{identificador:07d}', tipo, valor, ano, mes, dia]]
             writer = csv.writer(file, delimiter=',', lineterminator='\n')
             writer.writerows(conteudo)
+        print(f"Registro {conteudo} inserido com sucesso no arquivo {database_path}/movimentacoes.csv")
 
     elif tipo == 'investimento':
         if "taxa" not in parametros_investimento:
@@ -208,36 +225,19 @@ def criar_registro_movimentacao(tipo: str, valor: float,
         else:
             taxa = parametros_investimento["taxa"]
 
-        ultimo_registro_investimentos = int(retornar_ultimo_id(tipo=tipo, path=database_path))
-        if ultimo_registro_investimentos ==0:
-            identificador = ultimo_registro_investimentos + 1
-            rendimento = 0
-            capital = valor
-            montante=capital
-            conteudo = [[f'{identificador:07d}', tipo, capital, taxa, ano, mes, dia, montante, rendimento]]
-        else:
-            ultimo_investimento = read_csv(f"{database_path}/investimentos.csv")[-1]
-            dia_anterior =datetime.datetime(int(ultimo_investimento["ano"]), 
-                                            int(ultimo_investimento["mes"]), 
-                                            int(ultimo_investimento["dia"]))
-            dia_atual = datetime.datetime(ano, mes, dia)
-
-            rendimento = calcular_rendimento(taxa=taxa, 
-                                              valor=float(ultimo_investimento["montante"]), 
-                                                data_anterior=dia_anterior, 
-                                                data_atual=dia_atual)
-            identificador = ultimo_registro_investimentos + 1
-            capital = valor
-            montante = float(ultimo_investimento["montante"]) + capital + float(ultimo_investimento["rendimento"])
-
-            conteudo = [[f'{identificador:07d}', tipo,capital,taxa,ano,mes,dia,round(montante, 2),rendimento]]
-            
-
+        identificador = int(retornar_ultimo_id(tipo=tipo, path=database_path)) + 1
+        
+        # Nesse momento só insere no banco de dados, não calcula o rendimento. 
+        # O rendimento é calculad no segundo passo, para todo o banco de dados.
+        montante = 0
+        rendimento = 0
+        conteudo = [[f'{identificador:07d}', tipo, valor, taxa, ano, mes, dia, montante, rendimento]]
+        
         with open(f"{database_path}/investimentos.csv", 'a+') as file:
 
             writer = csv.writer(file, delimiter=',', lineterminator='\n')
             writer.writerows(conteudo)
-
+        print(f"Registro {conteudo} inserido com sucesso no arquivo {database_path}/investimentos.csv")
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
@@ -267,6 +267,34 @@ def calcular_rendimento(taxa: float=0.003,
     rendimento = montante_final- valor
     return round(rendimento, 3)
 
+def incluir_rendimento_investimento(database_path="database"):
+    investimentos = read_csv(f"{database_path}/investimentos.csv")
+    
+    print("Calculando rendimento dos investimentos...")
+    for nn, mov in enumerate(investimentos):
+        if nn == 0:
+            investimentos[nn]["rendimento"] = 0
+        else:
+            ultimo_investimento = investimentos[nn-1]
+            dia_anterior =datetime.datetime(int(ultimo_investimento["ano"]), 
+                                            int(ultimo_investimento["mes"]), 
+                                            int(ultimo_investimento["dia"]))
+            dia_atual = datetime.datetime(int(mov["ano"]), int(mov["mes"]), int(mov["dia"]))
+
+            rendimento = calcular_rendimento(taxa=float(mov["taxa"]), 
+                                                valor=float(ultimo_investimento["montante"]), 
+                                                data_anterior=dia_anterior, 
+                                                data_atual=dia_atual)
+            
+            montante = float(ultimo_investimento["montante"]) + float(mov["capital"]) + float(ultimo_investimento["rendimento"])
+
+            investimentos[nn]["montante"] = montante
+            investimentos[nn]["rendimento"] = rendimento
+
+    exportar_csv(investimentos, database_path, "investimento")
+    
+    print("Rendimento dos investimentos atualizados com sucesso!")
+
 def deletar_registro(indice: int, tipo: str,
                      database_path: str):
 
@@ -283,23 +311,19 @@ def deletar_registro(indice: int, tipo: str,
         movimentacoes = read_csv(f"{database_path}/movimentacoes.csv")
         registro_retirado = movimentacoes[indice]
         movimentacoes.pop(indice)
-        keys = movimentacoes[0].keys()
-        with open(f"{database_path}/movimentacoes.csv", 'w') as file:
-            dict_writer = csv.DictWriter(file, keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(movimentacoes)
+        exportar_csv(movimentacoes, database_path, tipo)
+
     elif tipo == 'investimento':
-        movimentacoes = read_csv(f"{database_path}/investimentos.csv")
+        investimentos = read_csv(f"{database_path}/investimentos.csv")
         registro_retirado = movimentacoes[indice]
-        movimentacoes.pop(indice)
-        keys = movimentacoes[0].keys()
-        with open(f"{database_path}/investimentos.csv", 'w') as file:
-            dict_writer = csv.DictWriter(file, keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(movimentacoes)
+        investimentos.pop(indice)
+        
+        exportar_csv(investimentos, database_path, tipo)
+        
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
+        
     return print(f"Registro {registro_retirado} deletado com sucesso!")
 
 
@@ -326,15 +350,13 @@ def atualizar_registro(indice: int,
             temp_id = int(mov["id"])
             if temp_id == indice:
                 if "valor" in parametros:
-                    movimentacoes[temp_id-1]["valor"] = parametros["valor"]
+                    movimentacoes[nn]["valor"] = parametros["valor"]
                 if "tipo" in parametros:
-                    movimentacoes[temp_id-1]["tipo"] = tipo
+                    movimentacoes[nn]["tipo"] = tipo
+                print(f"Registro {indice} atualizado para {movimentacoes[nn]} com sucesso!")
+                break
+        exportar_csv(movimentacoes, database_path, tipo)
 
-        keys = movimentacoes[0].keys()
-        with open(f"{database_path}/movimentacoes.csv", 'w') as file:
-            dict_writer = csv.DictWriter(file, keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(movimentacoes)
     elif tipo == 'investimento':
         if "taxa" not in parametros:
             raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
@@ -345,60 +367,18 @@ def atualizar_registro(indice: int,
             temp_id = int(mov["id"])
             if temp_id == indice:
                 if "valor" in parametros:
-                    investimentos[temp_id-1]["capital"] = parametros["valor"]
+                    investimentos[nn]["capital"] = parametros["valor"]
                 if "tipo" in parametros:
-                    investimentos[temp_id-1]["tipo"] = tipo
+                    investimentos[nn]["tipo"] = tipo
                 if "taxa" in parametros:
-                    investimentos[temp_id-1]["taxa"] = taxa
+                    investimentos[nn]["taxa"] = taxa
                 if "capital" in parametros:
-                    investimentos[temp_id-1]["capital"] = parametros["capital"]
+                    investimentos[nn]["capital"] = parametros["capital"]
+                print(f"Registro {indice} atualizado para {investimentos[nn]} com sucesso!")
                 break
         
-        investimentos_atualizados = []
-        for nn, mov in enumerate(investimentos):
-            if nn == 0:
-                investimentos_atualizados.append({
-                    "id": mov["id"],
-                    "tipo": mov["tipo"],
-                    "capital": mov["capital"],
-                    "taxa": mov["taxa"],
-                    "ano": mov["ano"],
-                    "mes": mov["mes"],
-                    "dia": mov["dia"],
-                    "montante": mov["montante"],
-                    "rendimento": mov["rendimento"]
-                })
-            else:
-                ultimo_investimento = investimentos[nn-1]
-                dia_anterior =datetime.datetime(int(ultimo_investimento["ano"]), 
-                                                int(ultimo_investimento["mes"]), 
-                                                int(ultimo_investimento["dia"]))
-                dia_atual = datetime.datetime(int(mov["ano"]), int(mov["mes"]), int(mov["dia"]))
-
-                rendimento = calcular_rendimento(taxa=taxa, 
-                                                valor=float(ultimo_investimento["montante"]), 
-                                                    data_anterior=dia_anterior, 
-                                                    data_atual=dia_atual)
-                identificador = nn + 1
-                montante = float(ultimo_investimento["montante"]) + float(mov["capital"]) + float(ultimo_investimento["rendimento"])
-
-                investimentos_atualizados.append({
-                    "id": mov["id"],
-                    "tipo": mov["tipo"],
-                    "capital": mov["capital"],
-                    "taxa": mov["taxa"],
-                    "ano": mov["ano"],
-                    "mes": mov["mes"],
-                    "dia": mov["dia"],
-                    "montante": montante,
-                    "rendimento": rendimento
-                })
-
-        keys = investimentos_atualizados[0].keys()
-        with open(f"{database_path}/investimentos.csv", 'w') as file:
-            dict_writer = csv.DictWriter(file, keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(investimentos_atualizados)
+        exportar_csv(investimentos, database_path, tipo)
+        incluir_rendimento_investimento(database_path=database_path)
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
@@ -436,6 +416,8 @@ def exportar_relatorio_json(movimentacoes, formato='json', nome_arquivo='relator
         json_object = json.dumps(relatorio_json, default=str, indent=4)
         with open(f"./database/{nome_arquivo}.json", "w") as outfile:
             outfile.write(json_object)
+
+    print(f"Relatorio {nome_arquivo} exportado com sucesso!")
     # elif formato == 'csv':
     #     relatorio_csv = "ID, Data,Tipo,Valor,Montante\n"
     #     for mov in movimentacoes[1:]:

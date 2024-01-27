@@ -1,52 +1,52 @@
 {
     "0000002": {
         "tipo": "investimento",
-        "capital": "1",
+        "capital": "1574.0",
         "taxa": "0.01",
         "ano": "2023",
-        "mes": "5",
-        "dia": "28",
-        "montante": "2.0",
+        "mes": "1",
+        "dia": "27",
+        "montante": "1574.0",
         "rendimento": "0.0"
     },
     "0000003": {
         "tipo": "investimento",
-        "capital": "1",
+        "capital": "9072.0",
         "taxa": "0.01",
         "ano": "2023",
-        "mes": "5",
-        "dia": "28",
-        "montante": "8127.715",
-        "rendimento": "0.0"
+        "mes": "4",
+        "dia": "14",
+        "montante": "10646.0",
+        "rendimento": "1812.496"
     },
     "0000004": {
         "tipo": "investimento",
-        "capital": "22",
+        "capital": "13",
         "taxa": "0.01",
         "ano": "2023",
         "mes": "5",
         "dia": "28",
-        "montante": "12098.87",
-        "rendimento": "0.0"
+        "montante": "12471.496",
+        "rendimento": "5848.035"
     },
     "0000005": {
         "tipo": "investimento",
-        "capital": "1",
+        "capital": "988.0",
         "taxa": "0.01",
         "ano": "2023",
-        "mes": "5",
-        "dia": "28",
-        "montante": "24252.420000000002",
-        "rendimento": "0.0"
+        "mes": "6",
+        "dia": "9",
+        "montante": "19307.531",
+        "rendimento": "1581.698"
     },
     "0000006": {
         "tipo": "investimento",
-        "capital": "1",
+        "capital": "1063.0",
         "taxa": "0.01",
         "ano": "2023",
-        "mes": "5",
-        "dia": "28",
-        "montante": "32462.420000000002",
-        "rendimento": "0.0"
+        "mes": "12",
+        "dia": "16",
+        "montante": "21952.229",
+        "rendimento": "108568.091"
     }
 }
