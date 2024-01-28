@@ -1,5 +1,1 @@
 id,tipo,capital,taxa,ano,mes,dia,montante,rendimento
-0000001,investimento,100.0,0.01,2024,1,1,100.0,0
-0000002,investimento,100.0,0.01,2023,1,1,200.0,-97.353
-0000003,investimento,100.0,0.01,2024,1,2,202.65,7432.254
-0000004,investimento,2000.0,0.01,2023,1,31,9634.9,-195.492
