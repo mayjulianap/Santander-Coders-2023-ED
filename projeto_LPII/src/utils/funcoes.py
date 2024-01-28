@@ -187,7 +187,8 @@ def incluir_registros_base_dados(**parametros):
 
         if opt == 0:
             print("Saindo do programa.")
-            exit()
+            # exit()
+            break
 
         elif opt == 9:
             break
@@ -254,6 +255,7 @@ def incluir_registros_base_dados(**parametros):
             # inclui os dados nos bancos de dados
             for financa in financas:
                 tipo = financa["tipo"]
+                print(tipo)
                 valor = float(financa["valor"])
                 data = financa["data"]
                 dia = int(data.split("-")[2])
@@ -264,12 +266,11 @@ def incluir_registros_base_dados(**parametros):
                         raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
                     else:
                         taxa = parametros["taxa"]
-                    criar_registro_movimentacao(tipo=tipo, valor=valor,
-                                            ano=ano, mes=mes, dia=dia,
-                                            taxa=taxa)
+                    registro = {"tipo":tipo, "valor":valor, "dia":dia, "mes":mes, "ano":ano, "taxa":taxa}
+                    criar_registro_movimentacao(parametros=registro, database_path=path)
                 else:
-                    criar_registro_movimentacao(tipo=tipo, valor=valor,
-                                            ano=ano, mes=mes, dia=dia)
+                    registro = {"tipo":tipo, "valor":valor, "dia":dia, "mes":mes, "ano":ano}
+                    criar_registro_movimentacao(parametros=registro, database_path=path)
 
             
             incluir_rendimento_investimento(database_path=path)
