@@ -1,5 +1,7 @@
 import csv
+import os
 
+print(os.getcwd())
 try:
     with open('./database/movimentacoes.csv', 'x') as file:
         cabecalho = [['id', 'tipo', 'valor', 'ano', 'mes', 'dia']]

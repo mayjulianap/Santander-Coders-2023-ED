@@ -2,6 +2,9 @@ import csv
 import json
 import datetime
 from datetime import date
+import os
+import sys
+
 
 def avalia_receita_despesa(tipo: str, valor: float):
     if tipo == 'despesa':
@@ -40,8 +43,7 @@ def read_base_financas(path):
     """
     return read_csv(path)
 
-
-def incluir_manualmente():
+def incluir_manualmente(parametros:dict):
     """
     inclui um registro manualmente
 
@@ -50,13 +52,93 @@ def incluir_manualmente():
         valor (float): valor da movimentação
         data (str): data da movimentação
     """
-    tipo = input("Insira o tipo de registro: Investimento | Despesa | Receita: ")
+    # if parametros['tipo'] == "investimento":
+    #             try:
+    #                 if parametros['tipo'] == "investimento":
+    #                     float(parametros['taxa'])
+    #                 else:
+    #                     taxa = None
+                        
+    #             except (ValueError, KeyError) as e:
+    #                 print(e)
+    #                 print('A taxa configurada no código fonte é inválida. Contate o TI.')
+    #                 os.system('pause')
+    #                 os.system('cls')
+    #                 return 400
 
-    valor = float(input("Insira o valor da movimentacao: "))
+                # if "taxa" not in parametros:
+                #     raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
+                # else:
+                # taxa = parametros["taxa"]
+                    
 
-    data = input("Insira a data da movimentacao (YYYY-MM-DD): ")
+    while True:
+        os.system('cls')
+        try:
+            tipo = input("Insira o tipo de registro: Investimento | Despesa | Receita: ")
+            
+            if tipo.lower() not in ['investimento', 'despesa', 'receita']:
+                raise ValueError('Opção inválida!')
+            
+            elif tipo.lower() == 'investimento':
+                float(parametros['taxa'])
+                break
 
-    return tipo, valor, data
+            else:
+                break
+
+        except KeyError as e:
+            print('***A taxa do investimento não está sendo passada como parâmetro. Favor, contatar o TI.\n')
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+            continue
+
+        except ValueError as e:
+            print(e)
+            print('***A taxa configurada no código fonte é inválida. Favor, contatar o TI.\n')
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+            continue
+
+    while True:      
+        try:
+            valor = float(input("Insira o valor da movimentacao: "))
+            
+            if valor < 0:
+                raise ValueError('O valor deve ser numérico e maior ou igual a 0.')
+            else:
+                break
+
+        except ValueError as e:
+            print(e)
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+            continue
+    
+    while True:
+        try:
+            data = date.fromisoformat(input("Insira a data da movimentacao (YYYY-MM-DD): "))
+            break
+
+        except (ValueError, TypeError) as e :
+            print(e)
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+            continue
+
+    return {'tipo':tipo, 'valor':valor, 'data':data}
 
 def incluir_de_csv(path):
     """
@@ -80,31 +162,89 @@ def incluir_registros_base_dados(**parametros):
     """
 
     while True:
-        print('Como você deseja incluir os registros?')
-        print("1. Adicionar manualmente")
-        print("2. Importar Base CSV")
-        print("0. Sair do programa")
+        print('''Como você deseja incluir os registros?
+              
+            1. Adicionar manualmente
+            2. Importar Base CSV
+            9. Retornar ao menu principal
+            0. Sair do programa
+              ''')
         
-        opt = int(input("Digite a opção desejada: "))
+        try:
+            opt = int(input("Digite a opção desejada: "))
+            if (opt not in range(0, 3)) and opt != 9:
+                print('entrou no raise')
+                raise ValueError('Opção inválida!')
+
+        except ValueError as e:
+            print(f'Opção inválida!')
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+            continue
+
         if opt == 0:
             print("Saindo do programa.")
+            exit()
+
+        elif opt == 9:
             break
-        if opt == 1:
-            tipo, valor, data = incluir_manualmente()
-            dia = int(data.split("-")[2])
-            mes = int(data.split("-")[1])
-            ano = int(data.split("-")[0])
-            if tipo == "investimento":
-                if "taxa" not in parametros:
-                    raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
-                else:
-                    taxa = parametros["taxa"]
-                criar_registro_movimentacao(tipo=tipo, valor=valor,
-                                        ano=ano, mes=mes, dia=dia,
-                                        taxa=taxa)
-            else:
-                criar_registro_movimentacao(tipo=tipo, valor=valor,
-                                        ano=ano, mes=mes, dia=dia)
+
+        elif opt == 1:
+            try:
+                dict_parametros = incluir_manualmente(parametros)
+
+                if dict_parametros['tipo'].lower() == 'investimento':
+                    dict_parametros['taxa'] = parametros['taxa']
+                # tipo
+                # valor, 
+                # data, 
+                # taxa
+            except TypeError as e:
+                print(e)
+                continue
+
+            dict_parametros['dia'] = dict_parametros['data'].day
+            dict_parametros['mes'] = dict_parametros['data'].month
+            dict_parametros['ano'] = dict_parametros['data'].year
+            # dia = data.day
+            # mes = data.month
+            # ano = data.year
+        
+            # if tipo == "investimento":
+            #     try:
+            #         float(parametros['taxa'])
+            #     except ValueError as e:
+            #         print(e)
+            #         print('A taxa deve ser um valor decimal (float) com o separador decimal "."')
+            #         os.system('pause')
+            #         os.system('cls')
+            #         continue
+
+            #     if "taxa" not in parametros:
+            #         raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
+            #     else:
+            #         taxa = parametros["taxa"]
+
+            criar_registro_movimentacao(dict_parametros)
+            # criar_registro_movimentacao(tipo=tipo, valor=valor,
+        #                             ano=ano, mes=mes, dia=dia,
+        #                             taxa=taxa)
+        # # else:
+        #     criar_registro_movimentacao(tipo=tipo, valor=valor,
+        #                             ano=ano, mes=mes, dia=dia)
+            
+            print('Registro inserido com sucesso.')
+            
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+
+            os.system('cls')
+
+            
+
         elif opt == 2:
             if "path" not in parametros:
                 raise ValueError("Ler registros de um CSV requer o diretorio do arquivo.")
@@ -130,10 +270,12 @@ def incluir_registros_base_dados(**parametros):
                 else:
                     criar_registro_movimentacao(tipo=tipo, valor=valor,
                                             ano=ano, mes=mes, dia=dia)
+
             
             incluir_rendimento_investimento(database_path=path)
         else:
             print("Opção inválida!")
+
 
 
 # Verificar qual o último id inserido no registro
@@ -155,7 +297,7 @@ def retornar_ultimo_id(tipo: str, path: str):
     arquivo = "investimentos.csv" if tipo.lower() == 'investimento' else "movimentacoes.csv"
 
     try:
-        with open(f"{path}/{arquivo}", 'r') as file:
+        with open(os.path.join(path, arquivo), 'r') as file:
             reader = csv.reader(file, delimiter=',', lineterminator='\n', )
             lista_id = [linha[0] for linha in reader if linha[0] != 'id']
             ultimo_id = f'{0:07d}' if len(lista_id) == 0 else max(lista_id)
@@ -165,12 +307,14 @@ def retornar_ultimo_id(tipo: str, path: str):
 
 
 
-def criar_registro_movimentacao(tipo: str, valor: float,
-                           ano=date.today().year,
-                           mes=date.today().month,
-                           dia=date.today().day,
-                           database_path="database",
-                           **parametros_investimento):
+# def criar_registro_movimentacao(tipo: str, valor: float,
+#                            ano=date.today().year,
+#                            mes=date.today().month,
+#                            dia=date.today().day,
+#                            database_path="database",
+#                            **parametros_investimento):
+        
+def criar_registro_movimentacao(parametros: dict, database_path="database"):
     """Registra uma movimentação financeira.
 
             Parameters:
@@ -187,26 +331,19 @@ def criar_registro_movimentacao(tipo: str, valor: float,
             Returns:
                 None
         """
-    tipo = tipo.lower()
+    tipo = parametros['tipo'].lower()
+    valor = parametros['valor']
+    ano = parametros['ano']
+    mes = parametros['mes']
+    dia = parametros['dia'] 
 
-    
-        
-    # Validando os parâmetros de entrada
-    try:
-        dia, mes, ano = map(int, [dia, mes, ano])
-        data = date(ano, mes, dia)
-    # Tratamento de erro para digitação de valores não numéricos para dia, mes ou ano
-    except ValueError as e:
-        print(e, 'Erro ao registrar a data.',
-              'Dia, mês ou ano inválido(s).', sep='\n')
-
-    # Validando se o valor é numérico e positivo
-    try:
-        if valor < 0:
-            raise ValueError(f'Valor {valor} inválido.')
-    except (TypeError, ValueError) as e:
-        print(f'Valor {valor} inválido.',
-              'O valor deve ser numérico e maior ou igual a 0.', sep='\n')
+    # # Validando se o valor é numérico e positivo
+    # try:
+    #     if valor < 0:
+    #         raise ValueError(f'Valor {valor} inválido.')
+    # except (TypeError, ValueError) as e:
+    #     print(f'Valor {valor} inválido.',
+    #           'O valor deve ser numérico e maior ou igual a 0.', sep='\n')
 
     # Parâmetros validados. Inserindo movimentação de acordo com o tipo.
     if tipo in ['receita', 'despesa']:
@@ -220,10 +357,10 @@ def criar_registro_movimentacao(tipo: str, valor: float,
         print(f"Registro {conteudo} inserido com sucesso no arquivo {database_path}/movimentacoes.csv")
 
     elif tipo == 'investimento':
-        if "taxa" not in parametros_investimento:
+        if "taxa" not in parametros:
             raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
         else:
-            taxa = parametros_investimento["taxa"]
+            taxa = parametros["taxa"]
 
         identificador = int(retornar_ultimo_id(tipo=tipo, path=database_path)) + 1
         
