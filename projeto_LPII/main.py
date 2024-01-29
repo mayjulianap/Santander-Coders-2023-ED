@@ -1,5 +1,6 @@
 import os
 from src.utils.funcoes import *
+from prettytable import PrettyTable
 
 
 PATH = "./database"
@@ -39,7 +40,56 @@ while True:
         # pass
 
     elif opcao == 2:
-        implementacao_pedente()
+        os.system('cls')
+        while True:
+            print('''Qual saldo deseja consultar?
+        1 - Receitas e despesas
+        2 - Investimentos
+        9. Retornar ao menu principal
+        0. Sair do programa''')
+            try:
+                opcao = int(input())
+                if int(opcao) not in range(0, 3) and opcao != 9:
+                    raise ValueError(f'Opção inválida ({(int(opcao))})')
+            except ValueError as e:
+                print(e)
+                os.system('pause')
+                os.system('cls')
+                continue
+
+            if opcao == 0:
+                exit()
+
+            elif opcao == 1:
+                dados = read_csv(os.path.join(PATH, 'movimentacoes.csv'))
+        
+                # criação de uma tablea prettytable
+                tabela = PrettyTable()
+                tabela.field_names = dados[0].keys()
+                
+                for item in dados:
+                    tabela.add_row(item.values())
+
+                print(tabela)
+
+            elif opcao == 2:
+                dados = read_csv(os.path.join(PATH, 'investimentos.csv'))
+                
+                # criação de uma tablea prettytable
+                tabela = PrettyTable()
+                tabela.field_names = dados[0].keys()
+                
+                for item in dados:
+                    tabela.add_row(item.values())
+
+                print(tabela)
+                
+            elif opcao == 9:
+                break
+
+            os.system('pause')     
+            os.system('cls')
+            break
 
     elif opcao == 3:
         implementacao_pedente()
