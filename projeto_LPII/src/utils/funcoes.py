@@ -510,7 +510,7 @@ def atualizar_registro(indice: int,
             temp_id = int(mov["id"])
             if temp_id == indice:
                 if "valor" in parametros:
-                    movimentacoes[nn]["valor"] = parametros["valor"]
+                    movimentacoes[nn]["valor"] = avalia_receita_despesa(tipo, parametros["valor"])
                 if "tipo" in parametros:
                     movimentacoes[nn]["tipo"] = tipo
                 print(f"Registro {indice} atualizado para {movimentacoes[nn]} com sucesso!")
