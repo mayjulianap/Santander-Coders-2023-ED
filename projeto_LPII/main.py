@@ -21,6 +21,7 @@ while True:
           1 - Incluir novo registro
           2 - Consultar saldos
           3 - Atualizar registros
+          4 - Deletar registro
           0 - Sair''')
     
     try:
@@ -115,8 +116,8 @@ while True:
             if opcao == 0:
                 exit()   
 
-            if opcao == 1:
-                indice = int(input('Qual o índice do registro?\n'))
+            elif opcao == 1:
+                indice = input('Qual o índice do registro?\n')
                 valor = float(input('Qual o valor novo?\n'))
 
                 atualizar_registro(indice=indice,
@@ -127,8 +128,8 @@ while True:
                 os.system('pause')
                 continue
 
-            if opcao == 2:
-                indice = int(input('Qual o índice do registro?\n'))
+            elif opcao == 2:
+                indice = input('Qual o índice do registro?\n')
                 valor = float(input('Qual o valor novo?\n'))
 
                 atualizar_registro(indice=indice,
@@ -140,11 +141,50 @@ while True:
                 os.system('pause')
                 continue
 
-            if opcao == 9:
+            elif opcao == 9:
                 break
     
     elif opcao == 4:
-        implementacao_pedente()
-    
+        while True:
+            os.system('cls')
+        
+            print(''''Qual tipo de registro será deletado?
+            1 - Receitas e despesas
+            2 - investimento
+            9 - Retornar ao menu anterior
+            0 - Sair''')
+        
+            try:
+                opcao = int(input())
+                if int(opcao) not in range(0, 3) and opcao != 9:
+                    raise ValueError(f'Opção inválida ({(int(opcao))})')
+                os.system('cls')
+            
+            except ValueError as e:
+                print(e)
+                os.system('pause')
+                os.system('cls')
+                continue
+
+            if opcao == 0:
+                exit()   
+
+            elif opcao == 1:
+                indice = int(input('Qual o índice do registro?\n'))
+                deletar_registro(indice=indice,
+                                 tipo='despesa',
+                                 database_path=PATH)
+                os.system('pause')
+
+            elif opcao == 2:
+                indice = int(input('Qual o índice do registro?\n'))
+                deletar_registro(indice=indice,
+                                 tipo='investimento',
+                                 database_path=PATH)
+                os.system('pause')
+                
+            elif opcao == 9:
+                break
+
     elif opcao == 0:
         exit()
