@@ -592,6 +592,9 @@ def exportar_relatorio_json(movimentacoes, formato='json', nome_arquivo='relator
         json_object = json.dumps(relatorio_json, default=str, indent=4)
         with open(f"./database/{nome_arquivo}.json", "w", newline='') as outfile:
             outfile.write(json_object)
+    elif formato == 'csv':
+        tipo = movimentacoes[0]["tipo"]
+        exportar_csv(movimentacoes, f"./database/", tipo)
 
     print(f"Relatorio {nome_arquivo} exportado com sucesso!")
     # elif formato == 'csv':
