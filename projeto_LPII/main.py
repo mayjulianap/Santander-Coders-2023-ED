@@ -4,7 +4,7 @@ from prettytable import PrettyTable
 
 
 PATH = "./database"
-TAXA_INVESTIMENTO = 0.01
+TAXA_INVESTIMENTO = 0.03
 
 
 def implementacao_pedente():
@@ -22,11 +22,12 @@ while True:
           2 - Consultar saldos
           3 - Atualizar registros
           4 - Deletar registro
+          5 - Exportar dados
           0 - Sair''')
     
     try:
         opcao = int(input())
-        if int(opcao) not in range(0, 5):
+        if int(opcao) not in range(0, 6):
             raise ValueError(f'Opção inválida ({(int(opcao))})')
     except ValueError as e:
         print(e)
@@ -182,7 +183,41 @@ while True:
                                  tipo='investimento',
                                  database_path=PATH)
                 os.system('pause')
+
+            elif opcao == 9:
+                break
+
+    elif opcao == 5:
+        while True:
+            os.system('cls')
+
+            print(''''Qual o formato de saída?
+            1 - json
+            9 - Retornar ao menu anterior
+            0 - Sair''')
+        
+            try:
+                opcao = int(input())
+                if int(opcao) not in range(0, 2) and opcao != 9:
+                    raise ValueError(f'Opção inválida ({(int(opcao))})')
+                os.system('cls')
+            
+            except ValueError as e:
+                print(e)
+                os.system('pause')
+                os.system('cls')
+                continue
+
+            if opcao == 0:
+                exit()   
+
+            elif opcao == 1:
+                movimentacoes = read_csv(f"{PATH}/movimentacoes.csv")
+                exportar_relatorio_json(movimentacoes, formato='json', nome_arquivo='relatorio_movimentacoes')
                 
+                os.system('pause')
+                break
+
             elif opcao == 9:
                 break
 
