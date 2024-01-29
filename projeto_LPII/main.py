@@ -63,28 +63,125 @@ while True:
                 exit()
 
             elif opcao == 1:
-                dados = read_csv(os.path.join(PATH, 'movimentacoes.csv'))
-        
-                # criação de uma tablea prettytable
-                tabela = PrettyTable()
-                tabela.field_names = dados[0].keys()
+                os.system('cls')
+                print('1 - Analítico',
+                      '2 - Sintético',
+                      sep='\n')
                 
-                for item in dados:
-                    tabela.add_row(item.values())
+                opcao = int(input())
+                os.system('cls')
 
-                print(tabela)
+                if opcao == 1:
+                    dados = read_csv(os.path.join(PATH, 'movimentacoes.csv'))
+            
+                    # criação de uma tablea prettytable
+                    tabela = PrettyTable()
+                    tabela.field_names = dados[0].keys()
+                    
+                    for item in dados:
+                        tabela.add_row(item.values())
+
+                    print(tabela)
+
+                elif opcao == 2:
+                    movimentacoes = read_csv(f"{PATH}/movimentacoes.csv")
+                    print('Deseja agrupar por:',
+                          '1 - tipo de movimentação',
+                          '2 - mês da movimentação',
+                          sep='\n')
+                    
+                    opcao = int(input())
+                    os.system('cls')
+
+                    if opcao == 1:
+                        dados = agrupar_movimentacoes(movimentacoes, agrupar_por="tipo")
+
+                        # criação de uma tablea prettytable
+                        tabela = PrettyTable()
+                        tabela.field_names = dados.keys()
+                        
+                        tabela.add_row(dados.values())
+
+                        print(tabela)
+
+                    elif opcao == 2:
+                        dados = agrupar_movimentacoes(movimentacoes, agrupar_por="mes")
+                        # Convertendo o dicionário em uma lista de listas
+                        table_data = [[key, value] for key, value in dados.items()]
+
+                        # Criando a tabela PrettyTable
+                        tabela = PrettyTable()
+
+                        # Definindo os nomes das colunas
+                        tabela.field_names = ["Mês", "Valor"]
+
+                        # Adicionando os dados à tabela
+                        for row in table_data:
+                            tabela.add_row(row)
+
+                        # Exibindo a tabela
+                        print(tabela)
+
 
             elif opcao == 2:
-                dados = read_csv(os.path.join(PATH, 'investimentos.csv'))
+                os.system('cls')
+                print('1 - Analítico',
+                      '2 - Sintético',
+                      sep='\n')
                 
-                # criação de uma tablea prettytable
-                tabela = PrettyTable()
-                tabela.field_names = dados[0].keys()
-                
-                for item in dados:
-                    tabela.add_row(item.values())
+                opcao = int(input())
+                os.system('cls')
 
-                print(tabela)
+                if opcao == 1:
+                    dados = read_csv(os.path.join(PATH, 'investimentos.csv'))
+                
+                    # criação de uma tablea prettytable
+                    tabela = PrettyTable()
+                    tabela.field_names = dados[0].keys()
+                    
+                    for item in dados:
+                        tabela.add_row(item.values())
+
+                    print(tabela)
+
+                elif opcao == 2:
+                    investimentos = read_csv(f"{PATH}/investimentos.csv")
+                    print('Deseja agrupar por:',
+                          '1 - tipo de movimentação',
+                          '2 - mês da movimentação',
+                          sep='\n')
+                    
+                    opcao = int(input())
+                    os.system('cls')
+
+                    if opcao == 1:
+                        dados = agrupar_movimentacoes(investimentos, agrupar_por="tipo")
+
+                        # criação de uma tablea prettytable
+                        tabela = PrettyTable()
+                        tabela.field_names = dados.keys()
+                        
+                        tabela.add_row(dados.values())
+
+                        print(tabela)
+
+                    elif opcao == 2:
+                        dados = agrupar_movimentacoes(investimentos, agrupar_por="mes")
+                        # Convertendo o dicionário em uma lista de listas
+                        table_data = [[key, value] for key, value in dados.items()]
+
+                        # Criando a tabela PrettyTable
+                        tabela = PrettyTable()
+
+                        # Definindo os nomes das colunas
+                        tabela.field_names = ["Mês", "Valor"]
+
+                        # Adicionando os dados à tabela
+                        for row in table_data:
+                            tabela.add_row(row)
+
+                        # Exibindo a tabela
+                        print(tabela)
 
             elif opcao == 9:
                 break
