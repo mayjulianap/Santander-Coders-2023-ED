@@ -459,22 +459,32 @@ def deletar_registro(indice: int, tipo: str,
     tipo = tipo.lower()
     if tipo in ['receita', 'despesa']:
         movimentacoes = read_csv(f"{database_path}/movimentacoes.csv")
-        registro_retirado = movimentacoes[indice]
-        movimentacoes.pop(indice)
+        for nn, mov in enumerate(movimentacoes):
+            temp_id = int(mov["id"])
+            if temp_id == indice:
+                registro_retirado = movimentacoes[nn]
+                movimentacoes.pop(nn)
+                break
         exportar_csv(movimentacoes, database_path, tipo)
 
     elif tipo == 'investimento':
         investimentos = read_csv(f"{database_path}/investimentos.csv")
-        registro_retirado = movimentacoes[indice]
-        investimentos.pop(indice)
+        for nn, mov in enumerate(investimentos):
+            temp_id = int(mov["id"])
+            if temp_id == indice:
+                registro_retirado = investimentos[nn]
+                investimentos.pop(nn)
+                break
         
         exportar_csv(investimentos, database_path, tipo)
         
     else:
         print('Tipo de movimentação inválida.',
               'Escolha entre: "receita", "despesa" ou "investimento"', sep='\n')
-        
-    return print(f"Registro {registro_retirado} deletado com sucesso!")
+    try:     
+        return print(f"Registro {registro_retirado} deletado com sucesso!")
+    except UnboundLocalError as e:
+        return print(f"Registro {indice} não encontrado.")
 
 
 
