@@ -127,6 +127,19 @@ while True:
                 os.system('pause')
                 continue
 
+            if opcao == 2:
+                indice = int(input('Qual o índice do registro?\n'))
+                valor = float(input('Qual o valor novo?\n'))
+
+                atualizar_registro(indice=indice,
+                                tipo='investimento',
+                                database_path=PATH,
+                                valor=valor,
+                                taxa=TAXA_INVESTIMENTO)
+                
+                os.system('pause')
+                continue
+
             if opcao == 9:
                 break
     
