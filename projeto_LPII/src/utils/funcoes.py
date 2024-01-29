@@ -278,8 +278,13 @@ def incluir_registros_base_dados(**parametros):
 
             
             incluir_rendimento_investimento(database_path=path)
+        
+            if not 'ipykernel' in sys.modules:
+                os.system('pause')
+            os.system('cls')
+        
         else:
-            print("Opção inválida!")
+            print("Opção inválida!")        
 
 
 

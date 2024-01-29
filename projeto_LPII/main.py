@@ -17,10 +17,9 @@ while True:
     os.system('cls')
     print('Seja bem vindo ao FinAda!\n')
     print('''O que você deseja fazer?
-          1 - Registrar nova movimentação (receitas e despesas)
-          2 - Registrar um novo investimento
-          3 - Consultar saldos
-          4 - Atualizar registros
+          1 - Incluir novo registro
+          2 - Consultar saldos
+          3 - Atualizar registros
           0 - Sair''')
     
     try:
