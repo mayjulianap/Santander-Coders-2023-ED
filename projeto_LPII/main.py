@@ -83,7 +83,7 @@ while True:
                     tabela.add_row(item.values())
 
                 print(tabela)
-                
+
             elif opcao == 9:
                 break
 
@@ -92,7 +92,43 @@ while True:
             break
 
     elif opcao == 3:
-        implementacao_pedente()
+        while True:
+            os.system('cls')
+            print(''''Qual tipo de registro será atualizado?
+            1 - Receitas e despesas
+            2 - investimento
+            9 - Retornar ao menu anterior
+            0 - Sair''')
+            
+            try:
+                opcao = int(input())
+                if int(opcao) not in range(0, 3) and opcao != 9:
+                    raise ValueError(f'Opção inválida ({(int(opcao))})')
+                os.system('cls')
+            
+            except ValueError as e:
+                print(e)
+                os.system('pause')
+                os.system('cls')
+                continue
+
+            if opcao == 0:
+                exit()   
+
+            if opcao == 1:
+                indice = int(input('Qual o índice do registro?\n'))
+                valor = float(input('Qual o valor novo?\n'))
+
+                atualizar_registro(indice=indice,
+                                tipo='despesa',
+                                database_path=PATH,
+                                valor=valor)
+                
+                os.system('pause')
+                continue
+
+            if opcao == 9:
+                break
     
     elif opcao == 4:
         implementacao_pedente()
