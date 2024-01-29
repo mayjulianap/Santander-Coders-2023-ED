@@ -32,7 +32,7 @@ def exportar_csv(lista_dicts, path, tipo):
         filename = "investimentos.csv"
     else:
         raise ValueError("Tipo de movimentacao invalida.")
-    with open(f"{path}/{filename}", 'w') as file:
+    with open(f"{path}/{filename}", 'w', newline='') as file:
         dict_writer = csv.DictWriter(file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(lista_dicts)
@@ -187,7 +187,8 @@ def incluir_registros_base_dados(**parametros):
 
         if opt == 0:
             print("Saindo do programa.")
-            # exit()
+            if not 'ipykernel' in sys.modules:
+                exit()
             break
 
         elif opt == 9:
@@ -251,6 +252,7 @@ def incluir_registros_base_dados(**parametros):
                 raise ValueError("Ler registros de um CSV requer o diretorio do arquivo.")
             else:
                 path = parametros["path"]
+
             financas = incluir_de_csv(path)
             # inclui os dados nos bancos de dados
             for financa in financas:
@@ -261,11 +263,13 @@ def incluir_registros_base_dados(**parametros):
                 dia = int(data.split("-")[2])
                 mes = int(data.split("-")[1])
                 ano = int(data.split("-")[0])
+
                 if tipo == "investimento":
                     if "taxa" not in parametros:
                         raise ValueError("Tipo de movimentacao investimento requer parametro taxa.")
                     else:
                         taxa = parametros["taxa"]
+
                     registro = {"tipo":tipo, "valor":valor, "dia":dia, "mes":mes, "ano":ano, "taxa":taxa}
                     criar_registro_movimentacao(parametros=registro, database_path=path)
                 else:
@@ -298,8 +302,8 @@ def retornar_ultimo_id(tipo: str, path: str):
     arquivo = "investimentos.csv" if tipo.lower() == 'investimento' else "movimentacoes.csv"
 
     try:
-        with open(os.path.join(path, arquivo), 'r') as file:
-            reader = csv.reader(file, delimiter=',', lineterminator='\n', )
+        with open(os.path.join(path, arquivo), 'r', newline='') as file:
+            reader = csv.reader(file, delimiter=',')
             lista_id = [linha[0] for linha in reader if linha[0] != 'id']
             ultimo_id = f'{0:07d}' if len(lista_id) == 0 else max(lista_id)
         return ultimo_id
@@ -350,11 +354,14 @@ def criar_registro_movimentacao(parametros: dict, database_path="database"):
     if tipo in ['receita', 'despesa']:
         valor = avalia_receita_despesa(tipo, valor)
         identificador = int(retornar_ultimo_id(tipo=tipo, path=database_path)) + 1
-        with open(f"{database_path}/movimentacoes.csv", 'a+') as file:
+
+        with open(f"{database_path}/movimentacoes.csv", 'a+', newline='') as file:
             identificador = int(retornar_ultimo_id(tipo=tipo, path=database_path)) + 1
             conteudo = [[f'{identificador:07d}', tipo, valor, ano, mes, dia]]
-            writer = csv.writer(file, delimiter=',', lineterminator='\n')
+            writer = csv.writer(file, delimiter=',')
+            # writer = csv.writer(file, delimiter=',', lineterminator='\n')
             writer.writerows(conteudo)
+
         print(f"Registro {conteudo} inserido com sucesso no arquivo {database_path}/movimentacoes.csv")
 
     elif tipo == 'investimento':
@@ -371,7 +378,7 @@ def criar_registro_movimentacao(parametros: dict, database_path="database"):
         rendimento = 0
         conteudo = [[f'{identificador:07d}', tipo, valor, taxa, ano, mes, dia, montante, rendimento]]
         
-        with open(f"{database_path}/investimentos.csv", 'a+') as file:
+        with open(f"{database_path}/investimentos.csv", 'a+', newline='') as file:
 
             writer = csv.writer(file, delimiter=',', lineterminator='\n')
             writer.writerows(conteudo)
@@ -552,7 +559,7 @@ def exportar_relatorio_json(movimentacoes, formato='json', nome_arquivo='relator
             id_ = mov.pop('id')
             relatorio_json[id_] = mov 
         json_object = json.dumps(relatorio_json, default=str, indent=4)
-        with open(f"./database/{nome_arquivo}.json", "w") as outfile:
+        with open(f"./database/{nome_arquivo}.json", "w", newline='') as outfile:
             outfile.write(json_object)
 
     print(f"Relatorio {nome_arquivo} exportado com sucesso!")
