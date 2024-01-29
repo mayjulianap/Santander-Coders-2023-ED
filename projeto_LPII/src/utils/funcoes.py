@@ -140,7 +140,7 @@ def incluir_manualmente(parametros:dict):
 
     return {'tipo':tipo, 'valor':valor, 'data':data}
 
-def incluir_de_csv(path):
+def incluir_de_csv(path, **parametros):
     """
     inclui um registro manualmente
 
@@ -149,7 +149,10 @@ def incluir_de_csv(path):
         valor (float): valor da movimentação
         data (str): data da movimentação
     """
-    nome_arquivo = input("Insira o nome do arquivo: ")
+    if "nome_arquivo" in parametros:
+        nome_arquivo = parametros["nome_arquivo"]
+    else:
+        nome_arquivo = input("Insira o nome do arquivo: ")
     
     financas = read_csv(f"{path}/{nome_arquivo}")
 
@@ -160,21 +163,26 @@ def incluir_registros_base_dados(**parametros):
     """
     inclui registros na base de dados
     """
-
-    while True:
-        print('''Como você deseja incluir os registros?
-              
-            1. Adicionar manualmente
-            2. Importar Base CSV
-            9. Retornar ao menu principal
-            0. Sair do programa
-              ''')
+    
         
+    while True:
         try:
-            opt = int(input("Digite a opção desejada: "))
-            if (opt not in range(0, 3)) and opt != 9:
-                print('entrou no raise')
-                raise ValueError('Opção inválida!')
+            if "nome_arquivo" in parametros:
+                nome_arquivo = parametros["nome_arquivo"]
+                opt = 2
+            else:
+                print('''Como você deseja incluir os registros?
+                    
+                    1. Adicionar manualmente
+                    2. Importar Base CSV
+                    9. Retornar ao menu principal
+                    0. Sair do programa
+                    ''')
+                
+                opt = int(input("Digite a opção desejada: "))
+                if (opt not in range(0, 3)) and opt != 9:
+                    print('entrou no raise')
+                    raise ValueError('Opção inválida!')
 
         except ValueError as e:
             print(f'Opção inválida!')
@@ -253,7 +261,11 @@ def incluir_registros_base_dados(**parametros):
             else:
                 path = parametros["path"]
 
-            financas = incluir_de_csv(path)
+            if "nome_arquivo" in parametros:
+                nome_arquivo = parametros["nome_arquivo"]
+                financas = incluir_de_csv(path, nome_arquivo=nome_arquivo)
+            else:
+                financas = incluir_de_csv(path)
             # inclui os dados nos bancos de dados
             for financa in financas:
                 tipo = financa["tipo"]
@@ -278,12 +290,16 @@ def incluir_registros_base_dados(**parametros):
 
             
             incluir_rendimento_investimento(database_path=path)
-        
+
+            print('Registros inseridos com sucesso.')
+
             if not 'ipykernel' in sys.modules:
                 os.system('pause')
             os.system('cls')
-        
-        else:
+            
+            if "nome_arquivo" in parametros:
+                break
+        else:   
             print("Opção inválida!")        
 
 
