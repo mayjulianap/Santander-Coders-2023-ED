@@ -12,6 +12,9 @@ engine = create_engine(f'postgresql://postgres:{senha}@localhost:5432/ecommerce'
 
 for file_name in ["projeto_BDI/produtos.csv", "projeto_BDI/vendas.csv"]:
 	df = pd.read_csv(file_name, sep=',')
+	if "Preco" in df.columns:
+		df['Preco'] = df['Preco'].str.replace('$', '', regex=False).astype(float)
+
 	df = df.loc[:, ~df.columns.str.contains('^Unnamed')].copy()
 
 	# salva o dataframe como tabela no banco conectado
