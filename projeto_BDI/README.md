@@ -29,3 +29,29 @@ Neste contexto, o seu desafio será o de, a partir da base de dados disponibiliz
 
 5) Utilize as views construídas no item 4, e escreva um Jupyter Notebook para mostrar os insights coletados a partir dos dados.
   - **Observação:** É permitido o uso de gráficos e técnicas estatísticas para apresentar os insights.
+
+# Resolução
+
+Para criar os bancos, basta executar o script "create_tables.py". Ele vai solicitar a senha do seu Postgres no momento da execução.
+
+Foram formuladas 15 questões:
+
+  1. Qual é o valor médio das vendas?
+  2. Qual país tem maior número de vendas?
+  3. Quanto cada país contribuiu para o valor total das vendas?
+  4. Qual o dia da semana com mais vendas?
+  5. Quais são os 3 produtos menos vendidos?
+  6. Quantas vendas foram realizadas para cada categoria de produto?
+  7. Existe alguma tendência sazonal nas vendas de determinadas categorias de produtos?
+  8. Há alguma correlação entre o preço do produto e sua popularidade (quantidade vendida)?
+  9. Como o nível de serviço de envio (ship-service-level) afeta o volume de vendas?
+  10. Qual é a média de unidades vendidas por pedido?
+  11. Quais produtos tiveram mais vendas canceladas?
+  12. Quais paises tiveram mais cancelamentos?
+  13. Qual é a relação entre o país de envio e a escolha do produto?
+  14. Quais são os top 5 produtos mais vendidos em cada país?
+  15. Existe uma diferença no volume de vendas entre dias úteis e fins de semana?
+
+Para quase todas as perguntas foi criado uma View no SQL. Os scripts para gerar as Viws estão dentro da pasta "views_sql". Você pode executar cara arquivo separadamente ou utilizar o arquivo "projetoecommerce.sql" que possui todos os códigos para geração das Views.
+
+As respostas para cada pergunta estão no arquivo "analises.ipynb".
