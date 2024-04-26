@@ -3,3 +3,4 @@ ipython-sql
 sqlalchemy
 psycopg2
 great_expectations
+kaggle
