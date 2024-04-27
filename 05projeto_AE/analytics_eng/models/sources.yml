@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: analytics_eng
+    tables:
+      - name: raw_metadata
+        description: "The raw CSV data loaded into the database."
