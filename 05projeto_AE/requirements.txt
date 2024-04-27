@@ -4,3 +4,5 @@ sqlalchemy
 psycopg2
 great_expectations
 kaggle
+dbt-core 
+dbt-postgres
