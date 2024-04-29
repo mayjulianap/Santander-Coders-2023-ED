@@ -2,15 +2,15 @@
 
 SELECT
     adult,
-    budget,
+    CAST(budget as FLOAT),
     id,
     imdb_id,
     original_language,
     original_title,
     overview,
     popularity,
-    release_date,
-    revenue,
+    CAST(release_date AS TIMESTAMP),
+    CAST(revenue AS FLOAT),
     runtime,
     status,
     title,
